@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0e1424"/>
+      <stop offset="100%" stop-color="#05080f"/>
+    </linearGradient>
+    <linearGradient id="waterGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f0ff"/>
+      <stop offset="100%" stop-color="#0066ff"/>
+    </linearGradient>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ff2a5f"/>
+      <stop offset="100%" stop-color="#8b5cf6"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#bg)"/>
+  <rect width="504" height="504" x="4" y="4" rx="124" fill="none" stroke="#00f0ff" stroke-width="4" stroke-opacity="0.3"/>
+  
+  <!-- Outer Shield Ring -->
+  <path d="M256 70 L390 130 C390 270 330 380 256 430 C182 380 122 270 122 130 Z" fill="none" stroke="url(#shieldGrad)" stroke-width="14" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"/>
+  
+  <!-- Water Drop in Center -->
+  <path d="M256 160 C256 160 330 250 330 310 C330 351 296 384 256 384 C216 384 182 351 182 310 C182 250 256 160 256 160 Z" fill="url(#waterGrad)" filter="url(#glow)"/>
+
+  <!-- Crosshair Accent Lines -->
+  <line x1="256" y1="90" x2="256" y2="130" stroke="#00f0ff" stroke-width="6" stroke-linecap="round"/>
+  <line x1="256" y1="390" x2="256" y2="420" stroke="#00f0ff" stroke-width="6" stroke-linecap="round"/>
+  <line x1="130" y1="260" x2="170" y2="260" stroke="#00f0ff" stroke-width="6" stroke-linecap="round"/>
+  <line x1="342" y1="260" x2="382" y2="260" stroke="#00f0ff" stroke-width="6" stroke-linecap="round"/>
+</svg>
