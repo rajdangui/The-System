@@ -3,6 +3,8 @@
 > **"Welcome, Player. You have been selected by The System."**  
 > A mobile-first Progressive Web App (PWA) that transforms your daily hydration, diet, workout habits, and weight loss into the authentic **Solo Leveling "SYSTEM"** RPG.
 
+🔗 **Live App**: [https://the-system-plum-psi.vercel.app/](https://the-system-plum-psi.vercel.app/)
+
 ---
 
 ## ⚔️ The System Architecture
