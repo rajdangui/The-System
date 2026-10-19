@@ -1,105 +1,104 @@
 import React from 'react';
-import { Sparkles, Shield, Award, Package, FlaskConical, Scroll, Zap, UserCheck } from 'lucide-react';
-import { playSystemSound } from '../utils/audio';
+import { Sparkles, Package, FlaskConical, Scroll, ShoppingBag, Coins, UserCheck, Shield } from 'lucide-react';
 
-export const ShadowsTab = ({ state, onUseItem }) => {
+export const ShadowsTab = ({ state, onUseItem, onBuyItem }) => {
   const { shadows, inventory, player } = state;
+
+  const shopItems = [
+    { id: 'inv_1', name: 'Mana Core Elixir', desc: '+500 mL Water Mana recovery', price: 1000, icon: FlaskConical },
+    { id: 'inv_2', name: 'Detox Talisman', desc: 'Neutralizes 10g of consumed sugar', price: 2000, icon: Scroll },
+  ];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* Monarch Extraction Throne Card */}
-      <div className="hud-card monarch">
+      <div className="sovereign-card monarch">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <div style={{ fontFamily: 'var(--font-hud)', fontSize: '0.74rem', color: 'var(--monarch-purple)', letterSpacing: '0.06em' }}>
-              MONARCH EXTRACTION VAULT
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.7rem', color: 'var(--sovereign-violet)', letterSpacing: '0.08em' }}>
+              SHADOW EXTRACTION VAULT
             </div>
-            <div style={{ fontFamily: 'var(--font-hud)', fontSize: '1.25rem', fontWeight: 700, color: '#fff', marginTop: 2 }}>
-              SHADOW ARMY DIVISION
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 700, color: '#fff', marginTop: 2 }}>
+              THE SHADOW ARMY
             </div>
-            <div style={{ fontSize: '0.74rem', color: 'var(--text-dim)', marginTop: 2 }}>
-              Command souls extracted from defeated dungeon bosses to fortify discipline.
+            <div style={{ fontSize: '0.72rem', color: '#94a3b8' }}>
+              Souls extracted from conquered dungeon bosses to guard streak shields.
             </div>
           </div>
 
           <div
             style={{
-              width: 44,
-              height: 44,
+              width: 42,
+              height: 42,
               borderRadius: 8,
-              background: 'linear-gradient(135deg, rgba(192, 132, 252, 0.2) 0%, transparent 100%)',
-              border: '1px solid var(--monarch-purple)',
+              background: 'rgba(168, 85, 247, 0.15)',
+              border: '1px solid var(--border-active-violet)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 0 15px rgba(192, 132, 252, 0.3)',
+              boxShadow: '0 0 16px rgba(168, 85, 247, 0.25)',
             }}
           >
-            <Sparkles size={22} color="var(--monarch-purple)" />
+            <Sparkles size={20} color="var(--sovereign-violet)" />
           </div>
         </div>
       </div>
 
       {/* Extracted Shadows Roster */}
-      <div className="hud-card">
-        <div style={{ fontFamily: 'var(--font-hud)', fontSize: '0.78rem', color: 'var(--mana-cyan)', letterSpacing: '0.06em', marginBottom: 12 }}>
-          EXTRACTED SHADOW RANKS ({shadows.length})
+      <div className="sovereign-card">
+        <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--electric-cyan)', letterSpacing: '0.08em', marginBottom: 12 }}>
+          EXTRACTED SHADOW SOLDIERS ({shadows.length})
         </div>
 
         {shadows.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-faint)', fontSize: '0.82rem' }}>
-            No shadows commanded yet. Defeat your first Dungeon Gate Boss to extract their shadow!
+          <div style={{ textAlign: 'center', padding: '16px 0', color: '#64748b', fontSize: '0.78rem' }}>
+            No shadows commanded yet. Defeat Dungeon Bosses to extract shadows into your legion!
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {shadows.map((sh) => (
               <div
                 key={sh.id}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 12,
-                  padding: '12px 14px',
-                  borderRadius: 8,
-                  background: 'rgba(192, 132, 252, 0.05)',
-                  border: '1px solid rgba(192, 132, 252, 0.25)',
-                }}
+                className="interactive-item"
+                style={{ borderColor: 'rgba(168, 85, 247, 0.25)' }}
               >
-                <div
-                  style={{
-                    width: 38,
-                    height: 38,
-                    borderRadius: 6,
-                    background: 'rgba(192, 132, 252, 0.15)',
-                    border: '1px solid var(--monarch-purple)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: 'var(--monarch-purple)',
-                  }}
-                >
-                  <UserCheck size={20} />
-                </div>
-
-                <div style={{ flex: 1 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <span style={{ fontFamily: 'var(--font-hud)', fontWeight: 600, fontSize: '0.9rem', color: '#fff' }}>
-                      {sh.name}
-                    </span>
-                    <span
-                      className="hunter-rank-crest"
-                      style={{
-                        borderColor: 'var(--monarch-purple)',
-                        color: 'var(--monarch-purple)',
-                        fontSize: '0.66rem',
-                        padding: '1px 6px',
-                      }}
-                    >
-                      {sh.rank}
-                    </span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div
+                    style={{
+                      width: 32,
+                      height: 32,
+                      borderRadius: 6,
+                      background: 'rgba(168, 85, 247, 0.12)',
+                      border: '1px solid var(--border-active-violet)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'var(--sovereign-violet)',
+                    }}
+                  >
+                    <UserCheck size={18} />
                   </div>
-                  <div style={{ fontSize: '0.74rem', color: 'var(--mana-cyan)', marginTop: 2, fontFamily: 'var(--font-mono)' }}>
-                    Active Buff: {sh.ability}
+
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.86rem', color: '#fff' }}>
+                        {sh.name}
+                      </span>
+                      <span
+                        className="hunter-rank-pill"
+                        style={{
+                          borderColor: 'var(--sovereign-violet)',
+                          color: 'var(--sovereign-violet)',
+                          fontSize: '0.64rem',
+                          padding: '0 5px',
+                        }}
+                      >
+                        {sh.rank}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '0.7rem', color: 'var(--electric-cyan)', fontFamily: 'var(--font-mono)' }}>
+                      Buff: {sh.ability}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -108,68 +107,120 @@ export const ShadowsTab = ({ state, onUseItem }) => {
         )}
       </div>
 
-      {/* Hunter Inventory */}
-      <div className="hud-card">
+      {/* Inventory Stash */}
+      <div className="sovereign-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Package size={16} color="var(--gold-amber)" />
-            <span style={{ fontFamily: 'var(--font-hud)', fontSize: '0.78rem', color: 'var(--gold-amber)', letterSpacing: '0.06em' }}>
-              CONSUMABLE SUPPLIES
+            <Package size={15} color="var(--sovereign-gold)" />
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--sovereign-gold)', letterSpacing: '0.08em' }}>
+              HUNTER INVENTORY ({inventory.reduce((a, b) => a + b.count, 0)})
             </span>
           </div>
-          <span style={{ fontSize: '0.72rem', color: 'var(--text-faint)', fontFamily: 'var(--font-mono)' }}>
-            System Stash
+          <span style={{ fontSize: '0.7rem', color: '#64748b', fontFamily: 'var(--font-mono)' }}>
+            Tap to Consume
           </span>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {inventory.map((item) => (
-            <div
-              key={item.id}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '10px 12px',
-                borderRadius: 6,
-                background: 'rgba(255, 255, 255, 0.02)',
-                border: '1px solid var(--hud-border-dark)',
-              }}
-            >
+            <div key={item.id} className="interactive-item">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div
                   style={{
-                    width: 32,
-                    height: 32,
+                    width: 30,
+                    height: 30,
                     borderRadius: 6,
-                    background: 'rgba(245, 158, 11, 0.1)',
-                    border: '1px solid rgba(245, 158, 11, 0.3)',
+                    background: 'rgba(251, 191, 36, 0.08)',
+                    border: '1px solid rgba(251, 191, 36, 0.3)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    color: 'var(--gold-amber)',
+                    color: 'var(--sovereign-gold)',
                   }}
                 >
-                  {item.type === 'potion' ? <FlaskConical size={16} /> : <Scroll size={16} />}
+                  {item.type === 'potion' ? <FlaskConical size={15} /> : <Scroll size={15} />}
                 </div>
 
                 <div>
-                  <div style={{ fontFamily: 'var(--font-hud)', fontWeight: 600, fontSize: '0.86rem', color: '#fff' }}>
-                    {item.name} <span style={{ color: 'var(--gold-amber)', fontFamily: 'var(--font-mono)' }}>x{item.count}</span>
+                  <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.84rem', color: '#fff' }}>
+                    {item.name} <span style={{ color: 'var(--sovereign-gold)', fontFamily: 'var(--font-mono)' }}>x{item.count}</span>
                   </div>
-                  <div style={{ fontSize: '0.7rem', color: 'var(--text-dim)' }}>{item.desc}</div>
+                  <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>{item.desc}</div>
                 </div>
               </div>
 
               <button
-                className="btn-hud"
-                style={{ fontSize: '0.72rem', padding: '5px 12px' }}
+                className="btn-sovereign"
+                style={{ fontSize: '0.72rem', padding: '4px 10px', minHeight: 28 }}
                 onClick={() => onUseItem(item.id)}
               >
                 Consume
               </button>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Hunter Guild Shop / Vault */}
+      <div className="sovereign-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <ShoppingBag size={15} color="var(--electric-cyan)" />
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--electric-cyan)', letterSpacing: '0.08em' }}>
+              HUNTER GUILD VAULT
+            </span>
+          </div>
+          <span style={{ fontSize: '0.72rem', color: 'var(--sovereign-gold)', fontFamily: 'var(--font-mono)' }}>
+            Balance: {player.gold.toLocaleString()} G
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {shopItems.map((item) => {
+            const Icon = item.icon;
+            const canAfford = player.gold >= item.price;
+            return (
+              <div key={item.id} className="interactive-item">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div
+                    style={{
+                      width: 30,
+                      height: 30,
+                      borderRadius: 6,
+                      background: 'rgba(0, 240, 255, 0.08)',
+                      border: '1px solid var(--border-active-cyan)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      color: 'var(--electric-cyan)',
+                    }}
+                  >
+                    <Icon size={15} />
+                  </div>
+                  <div>
+                    <div style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.84rem', color: '#fff' }}>
+                      {item.name}
+                    </div>
+                    <div style={{ fontSize: '0.68rem', color: '#94a3b8' }}>{item.desc}</div>
+                  </div>
+                </div>
+
+                <button
+                  className="btn-sovereign"
+                  style={{
+                    fontSize: '0.72rem',
+                    padding: '4px 10px',
+                    minHeight: 28,
+                    opacity: canAfford ? 1 : 0.5,
+                  }}
+                  disabled={!canAfford}
+                  onClick={() => onBuyItem(item.id, item.price)}
+                >
+                  <Coins size={12} /> {item.price.toLocaleString()} G
+                </button>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>

@@ -1,216 +1,142 @@
 import React, { useState } from 'react';
-import { X, Settings, RotateCcw, Save, ShieldAlert } from 'lucide-react';
+import { X, Sliders, Save, RotateCcw, Download, Upload, Shield } from 'lucide-react';
 
-export const SettingsModal = ({ isOpen, onClose, settings, onSave, onResetAll }) => {
-  const [form, setForm] = useState({ ...settings });
+export const SettingsModal = ({ isOpen, onClose, state, onSavePlayerSettings, onResetAll }) => {
+  const [formData, setFormData] = useState({
+    name: state.player.name,
+    job: state.player.job,
+    waterGoalMl: state.player.waterGoalMl,
+    sugarLimitG: state.player.sugarLimitG,
+    startWeight: state.player.startWeight,
+    targetWeight: state.player.targetWeight,
+  });
 
   if (!isOpen) return null;
 
-  const handleChange = (key, val) => {
-    setForm((prev) => ({ ...prev, [key]: val }));
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSavePlayerSettings(formData);
+    onClose();
   };
 
-  const handleSave = (e) => {
-    e.preventDefault();
-    onSave(form);
-    onClose();
+  const handleExportData = () => {
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(state, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', dataStr);
+    downloadAnchor.setAttribute('download', `the_system_backup_${new Date().toISOString().split('T')[0]}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
   };
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-sheet" onClick={(e) => e.stopPropagation()} style={{ maxHeight: '85vh', overflowY: 'auto' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+      <div className="modal-sheet" onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Settings size={20} color="var(--cyan-core)" />
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '1.1rem', color: '#fff' }}>
-              SENTINEL CONFIGURATION
+            <Sliders size={18} color="var(--electric-cyan)" />
+            <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 600, fontSize: '0.86rem', color: 'var(--electric-cyan)', letterSpacing: '0.08em' }}>
+              SYSTEM CONFIGURATION
             </span>
           </div>
-          <button
-            onClick={onClose}
-            style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer' }}
-          >
-            <X size={20} />
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#64748b', cursor: 'pointer' }}>
+            <X size={18} />
           </button>
         </div>
 
-        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {/* User Name */}
+        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           <div>
-            <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-              SOLDIER / CALLSIGN
-            </label>
+            <label style={{ fontSize: '0.72rem', color: '#94a3b8', fontFamily: 'var(--font-mono)' }}>HUNTER CALLSIGN</label>
             <input
               type="text"
-              value={form.userName || ''}
-              onChange={(e) => handleChange('userName', e.target.value)}
-              style={{
-                width: '100%',
-                background: 'var(--bg-input)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-md)',
-                padding: '10px 12px',
-                color: '#fff',
-                marginTop: 4,
-              }}
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              style={{ width: '100%', background: 'rgba(7, 9, 14, 0.8)', border: '1px solid var(--border-dormant)', borderRadius: 6, padding: '8px 10px', color: '#fff', fontSize: '0.85rem', marginTop: 4 }}
             />
           </div>
 
-          {/* Water Goal */}
           <div>
-            <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--cyan-core)' }}>
-              DAILY WATER MANDATE (mL)
-            </label>
+            <label style={{ fontSize: '0.72rem', color: '#94a3b8', fontFamily: 'var(--font-mono)' }}>JOB DESIGNATION</label>
             <input
-              type="number"
-              step="100"
-              value={form.waterGoal}
-              onChange={(e) => handleChange('waterGoal', parseInt(e.target.value, 10))}
-              style={{
-                width: '100%',
-                background: 'var(--bg-input)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-md)',
-                padding: '10px 12px',
-                color: '#fff',
-                marginTop: 4,
-                fontFamily: 'var(--font-display)',
-                fontWeight: 700,
-              }}
+              type="text"
+              value={formData.job}
+              onChange={(e) => setFormData({ ...formData, job: e.target.value })}
+              style={{ width: '100%', background: 'rgba(7, 9, 14, 0.8)', border: '1px solid var(--border-dormant)', borderRadius: 6, padding: '8px 10px', color: '#fff', fontSize: '0.85rem', marginTop: 4 }}
             />
           </div>
 
-          {/* Sugar Limit */}
-          <div>
-            <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--amber-core)' }}>
-              MAX DAILY SUGAR CEILING (Grams)
-            </label>
-            <input
-              type="number"
-              step="1"
-              value={form.sugarLimit}
-              onChange={(e) => handleChange('sugarLimit', parseFloat(e.target.value))}
-              style={{
-                width: '100%',
-                background: 'var(--bg-input)',
-                border: '1px solid var(--border-subtle)',
-                borderRadius: 'var(--radius-md)',
-                padding: '10px 12px',
-                color: '#fff',
-                marginTop: 4,
-                fontFamily: 'var(--font-display)',
-                fontWeight: 700,
-              }}
-            />
-          </div>
-
-          {/* Weight Metrics */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
-              <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                START WEIGHT ({form.unit})
-              </label>
+              <label style={{ fontSize: '0.72rem', color: 'var(--electric-cyan)', fontFamily: 'var(--font-mono)' }}>WATER MANDATE (mL)</label>
+              <input
+                type="number"
+                step="100"
+                value={formData.waterGoalMl}
+                onChange={(e) => setFormData({ ...formData, waterGoalMl: parseInt(e.target.value, 10) })}
+                style={{ width: '100%', background: 'rgba(7, 9, 14, 0.8)', border: '1px solid var(--border-dormant)', borderRadius: 6, padding: '8px 10px', color: '#fff', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', marginTop: 4 }}
+              />
+            </div>
+            <div>
+              <label style={{ fontSize: '0.72rem', color: 'var(--sovereign-gold)', fontFamily: 'var(--font-mono)' }}>SUGAR CAP (g)</label>
+              <input
+                type="number"
+                step="1"
+                value={formData.sugarLimitG}
+                onChange={(e) => setFormData({ ...formData, sugarLimitG: parseFloat(e.target.value) })}
+                style={{ width: '100%', background: 'rgba(7, 9, 14, 0.8)', border: '1px solid var(--border-dormant)', borderRadius: 6, padding: '8px 10px', color: '#fff', fontSize: '0.85rem', fontFamily: 'var(--font-mono)', marginTop: 4 }}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div>
+              <label style={{ fontSize: '0.72rem', color: '#94a3b8', fontFamily: 'var(--font-mono)' }}>START WEIGHT ({state.player.unit})</label>
               <input
                 type="number"
                 step="0.1"
-                value={form.startWeight}
-                onChange={(e) => handleChange('startWeight', parseFloat(e.target.value))}
-                style={{
-                  width: '100%',
-                  background: 'var(--bg-input)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '10px 12px',
-                  color: '#fff',
-                  marginTop: 4,
-                }}
+                value={formData.startWeight}
+                onChange={(e) => setFormData({ ...formData, startWeight: parseFloat(e.target.value) })}
+                style={{ width: '100%', background: 'rgba(7, 9, 14, 0.8)', border: '1px solid var(--border-dormant)', borderRadius: 6, padding: '8px 10px', color: '#fff', fontSize: '0.85rem', marginTop: 4 }}
               />
             </div>
             <div>
-              <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--emerald-core)' }}>
-                GOAL WEIGHT ({form.unit})
-              </label>
+              <label style={{ fontSize: '0.72rem', color: 'var(--calm-green)', fontFamily: 'var(--font-mono)' }}>TARGET WEIGHT ({state.player.unit})</label>
               <input
                 type="number"
                 step="0.1"
-                value={form.targetWeight}
-                onChange={(e) => handleChange('targetWeight', parseFloat(e.target.value))}
-                style={{
-                  width: '100%',
-                  background: 'var(--bg-input)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '10px 12px',
-                  color: '#fff',
-                  marginTop: 4,
-                }}
+                value={formData.targetWeight}
+                onChange={(e) => setFormData({ ...formData, targetWeight: parseFloat(e.target.value) })}
+                style={{ width: '100%', background: 'rgba(7, 9, 14, 0.8)', border: '1px solid var(--border-dormant)', borderRadius: 6, padding: '8px 10px', color: '#fff', fontSize: '0.85rem', marginTop: 4 }}
               />
             </div>
           </div>
 
-          {/* Height and Unit */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            <div>
-              <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                HEIGHT (cm)
-              </label>
-              <input
-                type="number"
-                value={form.heightCm || 178}
-                onChange={(e) => handleChange('heightCm', parseInt(e.target.value, 10))}
-                style={{
-                  width: '100%',
-                  background: 'var(--bg-input)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '10px 12px',
-                  color: '#fff',
-                  marginTop: 4,
-                }}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-secondary)' }}>
-                UNIT PREFERENCE
-              </label>
-              <select
-                value={form.unit}
-                onChange={(e) => handleChange('unit', e.target.value)}
-                style={{
-                  width: '100%',
-                  background: 'var(--bg-input)',
-                  border: '1px solid var(--border-subtle)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '10px 12px',
-                  color: '#fff',
-                  marginTop: 4,
-                }}
-              >
-                <option value="kg">kg (Kilograms)</option>
-                <option value="lbs">lbs (Pounds)</option>
-              </select>
-            </div>
-          </div>
+          <button type="submit" className="btn-sovereign" style={{ width: '100%', minHeight: 38, marginTop: 4 }}>
+            <Save size={15} /> Save Parameters
+          </button>
 
-          {/* Action Buttons */}
-          <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+          {/* Backup & Reset actions */}
+          <div style={{ display: 'flex', gap: 8, marginTop: 10, borderTop: '1px solid var(--border-dormant)', paddingTop: 12 }}>
             <button
               type="button"
-              className="btn btn-ghost"
-              style={{ flex: 1, fontSize: '0.8rem', color: 'var(--crimson-core)' }}
+              className="btn-sovereign btn-sovereign-ghost"
+              style={{ flex: 1, fontSize: '0.74rem' }}
+              onClick={handleExportData}
+            >
+              <Download size={13} /> Export Backup
+            </button>
+            <button
+              type="button"
+              className="btn-sovereign btn-sovereign-danger"
+              style={{ flex: 1, fontSize: '0.74rem' }}
               onClick={() => {
-                if (window.confirm('Reset all tracker records to default state?')) {
+                if (window.confirm('Reset all Hunter progression and state to default?')) {
                   onResetAll();
                   onClose();
                 }
               }}
             >
-              <RotateCcw size={14} />
-              Reset Data
-            </button>
-            <button type="submit" className="btn btn-primary-cyan" style={{ flex: 1.5 }}>
-              <Save size={16} />
-              Save Settings
+              <RotateCcw size={13} /> Factory Reset
             </button>
           </div>
         </form>

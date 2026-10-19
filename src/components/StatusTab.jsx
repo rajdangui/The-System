@@ -1,14 +1,26 @@
-import React from 'react';
-import { Shield, Sparkles, Droplets, Heart, Zap, Award, Flame, ChevronRight, Activity, Target } from 'lucide-react';
-import { getRankFromLevel } from '../utils/soloStorage';
+import React, { useState } from 'react';
+import { Heart, Droplets, Zap, Award, Scale, Trash2, Plus, Calendar, TrendingDown } from 'lucide-react';
+import { getRankFromLevel, getTodayKey } from '../utils/soloStorage';
 
-export const StatusTab = ({ state, onAllocateStat }) => {
-  const { player, stats, today, streakDays } = state;
+export const StatusTab = ({ state, onAllocateStat, onLogWeight, onDeleteWeightLog }) => {
+  const { player, stats, today, streakDays, weightHistory } = state;
   const rank = getRankFromLevel(player.level);
+
+  const [inputWeight, setInputWeight] = useState('');
+  const [showHistory, setShowHistory] = useState(false);
 
   // MP is directly linked to Water intake
   const mpPct = Math.min(100, Math.round((today.waterMl / player.waterGoalMl) * 100));
   const expPct = Math.min(100, Math.round((player.exp / player.expNext) * 100));
+
+  // Weight Progress Calculations
+  const totalDifference = Math.max(0.1, player.startWeight - player.targetWeight);
+  const currentLost = Math.max(0, player.startWeight - player.currentWeight);
+  const remaining = Math.max(0, player.currentWeight - player.targetWeight);
+  const progressPct = Math.min(100, Math.round((currentLost / totalDifference) * 100));
+
+  // Days to target estimate at strict pace (0.75 kg/week)
+  const daysToGoal = Math.ceil(remaining / (0.75 / 7));
 
   const statItems = [
     { key: 'str', label: 'STR', name: 'Strength', val: stats.str, desc: 'Conditioning, pushups & raw output' },
@@ -18,88 +30,86 @@ export const StatusTab = ({ state, onAllocateStat }) => {
     { key: 'sen', label: 'SEN', name: 'Perception', val: stats.sen, desc: 'Discipline radar & scale vigilance' },
   ];
 
+  const handleWeightSubmit = (e) => {
+    e.preventDefault();
+    const w = parseFloat(inputWeight);
+    if (!w || w <= 0) return;
+    onLogWeight(w);
+    setInputWeight('');
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* System Status Banner */}
-      <div
-        className="hud-card"
-        style={{
-          background: 'linear-gradient(135deg, rgba(14, 25, 42, 0.95) 0%, rgba(6, 12, 22, 0.95) 100%)',
-          borderColor: 'rgba(0, 229, 255, 0.35)',
-        }}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      {/* Player Header Card */}
+      <div className="sovereign-card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--mana-cyan)', boxShadow: '0 0 8px var(--mana-cyan)' }} />
-              <span style={{ fontFamily: 'var(--font-hud)', fontSize: '0.72rem', color: 'var(--mana-cyan)', letterSpacing: '0.08em' }}>
-                STATUS WINDOW ACTIVE
-              </span>
+            <div style={{ fontFamily: 'var(--font-mono)', fontSize: '0.68rem', color: 'var(--electric-cyan)', letterSpacing: '0.08em' }}>
+              STATUS // AWAKENED
             </div>
-            <div style={{ fontFamily: 'var(--font-hud)', fontSize: '1.45rem', fontWeight: 700, color: '#fff', letterSpacing: '0.03em' }}>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.4rem', fontWeight: 700, color: '#fff', marginTop: 2 }}>
               {player.name}
             </div>
-            <div style={{ fontSize: '0.76rem', color: 'var(--text-dim)', marginTop: 2 }}>
-              Title: <strong style={{ color: 'var(--gold-amber)' }}>{rank.title}</strong> • Job: <span style={{ color: '#fff' }}>{player.job}</span>
+            <div style={{ fontSize: '0.74rem', color: '#94a3b8' }}>
+              Title: <strong style={{ color: 'var(--sovereign-gold)' }}>{rank.title}</strong> • Job: <span style={{ color: '#fff' }}>{player.job}</span>
             </div>
           </div>
 
           <div style={{ textAlign: 'right' }}>
             <div
-              className="hunter-rank-crest"
+              className="hunter-rank-pill"
               style={{
                 borderColor: rank.color,
                 color: rank.color,
-                background: `linear-gradient(135deg, ${rank.color}25 0%, transparent 100%)`,
-                fontSize: '0.85rem',
+                background: `${rank.color}15`,
               }}
             >
               {rank.rank}
             </div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--clear-green)', fontWeight: 600, marginTop: 4 }}>
-              AWAKENED
+            <div style={{ fontSize: '0.72rem', color: 'var(--calm-green)', fontFamily: 'var(--font-mono)', marginTop: 4 }}>
+              OPTIMAL
             </div>
           </div>
         </div>
 
-        {/* Chamfered RPG Gauges: HP, MP, EXP */}
+        {/* Laser-Wireframe Gauges */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 16 }}>
-          {/* HP Gauge */}
-          <div className="gauge-container">
-            <div className="gauge-header">
-              <span style={{ color: 'var(--health-crimson)', display: 'flex', alignItems: 'center', gap: 5 }}>
-                <Heart size={13} fill="var(--health-crimson)" /> HP (Health Points)
+          {/* HP */}
+          <div className="laser-meter">
+            <div className="laser-meter-label">
+              <span style={{ color: '#38bdf8', display: 'flex', alignItems: 'center', gap: 5 }}>
+                <Heart size={12} fill="#38bdf8" /> HP (VITAL ENERGY)
               </span>
               <span style={{ color: '#fff' }}>{player.hp} / {player.maxHp}</span>
             </div>
-            <div className="gauge-rail-chamfer">
-              <div className="gauge-fill hp" style={{ width: `${(player.hp / player.maxHp) * 100}%` }} />
+            <div className="laser-meter-track">
+              <div className="laser-meter-fill hp" style={{ width: `${(player.hp / player.maxHp) * 100}%` }} />
             </div>
           </div>
 
-          {/* MP Gauge (Water Mana) */}
-          <div className="gauge-container">
-            <div className="gauge-header">
-              <span style={{ color: 'var(--mana-cyan)', display: 'flex', alignItems: 'center', gap: 5 }}>
-                <Droplets size={13} fill="var(--mana-cyan)" /> MP (Water Mana Pool)
+          {/* MP (Water Mana) */}
+          <div className="laser-meter">
+            <div className="laser-meter-label">
+              <span style={{ color: 'var(--sovereign-violet)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                <Droplets size={12} fill="var(--sovereign-violet)" /> MP (WATER MANA CORE)
               </span>
               <span style={{ color: '#fff' }}>{today.waterMl} / {player.waterGoalMl} mL ({mpPct}%)</span>
             </div>
-            <div className="gauge-rail-chamfer">
-              <div className="gauge-fill mp" style={{ width: `${mpPct}%` }} />
+            <div className="laser-meter-track">
+              <div className="laser-meter-fill mp" style={{ width: `${mpPct}%` }} />
             </div>
           </div>
 
-          {/* EXP Gauge */}
-          <div className="gauge-container">
-            <div className="gauge-header">
-              <span style={{ color: 'var(--monarch-purple)', display: 'flex', alignItems: 'center', gap: 5 }}>
-                <Zap size={13} fill="var(--monarch-purple)" /> EXP (Experience Core)
+          {/* EXP */}
+          <div className="laser-meter">
+            <div className="laser-meter-label">
+              <span style={{ color: 'var(--ethereal-sky)', display: 'flex', alignItems: 'center', gap: 5 }}>
+                <Zap size={12} fill="var(--ethereal-sky)" /> EXP (EXPERIENCE MATRIX)
               </span>
               <span style={{ color: '#fff' }}>{player.exp} / {player.expNext} ({expPct}%)</span>
             </div>
-            <div className="gauge-rail-chamfer">
-              <div className="gauge-fill exp" style={{ width: `${expPct}%` }} />
+            <div className="laser-meter-track">
+              <div className="laser-meter-fill exp" style={{ width: `${expPct}%` }} />
             </div>
           </div>
         </div>
@@ -109,8 +119,8 @@ export const StatusTab = ({ state, onAllocateStat }) => {
       {player.unallocatedStats > 0 && (
         <div
           style={{
-            background: 'linear-gradient(90deg, rgba(245, 158, 11, 0.15) 0%, rgba(14, 20, 32, 0.9) 100%)',
-            border: '1px solid rgba(245, 158, 11, 0.4)',
+            background: 'rgba(251, 191, 36, 0.08)',
+            border: '1px solid rgba(251, 191, 36, 0.3)',
             borderRadius: 8,
             padding: '10px 14px',
             display: 'flex',
@@ -119,52 +129,50 @@ export const StatusTab = ({ state, onAllocateStat }) => {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Award size={18} color="var(--gold-amber)" />
-            <div style={{ fontFamily: 'var(--font-hud)', fontSize: '0.84rem', color: '#fff', fontWeight: 600 }}>
-              UNALLOCATED POINTS: <span style={{ color: 'var(--gold-amber)' }}>+{player.unallocatedStats}</span>
+            <Award size={16} color="var(--sovereign-gold)" />
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '0.82rem', color: '#fff', fontWeight: 600 }}>
+              UNALLOCATED STAT POINTS: <span style={{ color: 'var(--sovereign-gold)' }}>+{player.unallocatedStats}</span>
             </div>
           </div>
-          <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
+          <span style={{ fontSize: '0.7rem', color: '#94a3b8', fontFamily: 'var(--font-mono)' }}>
             Tap [+] to assign
           </span>
         </div>
       )}
 
-      {/* Stats Board */}
-      <div className="hud-card">
+      {/* Hunter Parameters (Stats) */}
+      <div className="sovereign-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <span style={{ fontFamily: 'var(--font-hud)', fontSize: '0.78rem', color: 'var(--mana-cyan)', letterSpacing: '0.06em' }}>
+          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--electric-cyan)', letterSpacing: '0.08em' }}>
             HUNTER PARAMETERS
           </span>
-          <span style={{ fontSize: '0.72rem', color: 'var(--text-dim)', fontFamily: 'var(--font-mono)' }}>
-            Base Attribute Matrix
+          <span style={{ fontSize: '0.7rem', color: '#64748b', fontFamily: 'var(--font-mono)' }}>
+            Base Matrix
           </span>
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {statItems.map((st) => (
-            <div key={st.key} className="stat-row">
+            <div key={st.key} className="interactive-item">
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                <span style={{ fontFamily: 'var(--font-hud)', fontWeight: 700, fontSize: '0.86rem', color: '#fff', width: 36 }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: '0.82rem', color: '#fff', width: 34 }}>
                   {st.label}
                 </span>
                 <div>
-                  <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-bright)' }}>
-                    {st.name}
-                  </div>
-                  <div style={{ fontSize: '0.68rem', color: 'var(--text-faint)' }}>{st.desc}</div>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#e2e8ea' }}>{st.name}</div>
+                  <div style={{ fontSize: '0.66rem', color: '#64748b' }}>{st.desc}</div>
                 </div>
               </div>
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <span style={{ fontFamily: 'var(--font-hud)', fontWeight: 700, fontSize: '1.2rem', color: 'var(--mana-cyan)' }}>
+                <span style={{ fontFamily: 'var(--font-mono)', fontWeight: 700, fontSize: '1.1rem', color: 'var(--electric-cyan)' }}>
                   {st.val}
                 </span>
                 {player.unallocatedStats > 0 && (
                   <button
-                    className="btn-stat-chamfer"
+                    className="btn-sovereign"
+                    style={{ minHeight: 26, width: 26, padding: 0, fontSize: '0.88rem' }}
                     onClick={() => onAllocateStat(st.key)}
-                    title={`Allocate +1 to ${st.label}`}
                   >
                     +
                   </button>
@@ -175,43 +183,108 @@ export const StatusTab = ({ state, onAllocateStat }) => {
         </div>
       </div>
 
-      {/* Physical Metamorphosis Attributes */}
-      <div className="hud-card">
+      {/* Dynamic Weight Metamorphosis Card */}
+      <div className="sovereign-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <span style={{ fontFamily: 'var(--font-hud)', fontSize: '0.78rem', color: 'var(--mana-cyan)', letterSpacing: '0.06em' }}>
-            VESSEL CALIBRATION
-          </span>
-          <span style={{ fontSize: '0.74rem', color: 'var(--gold-amber)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
-            {streakDays} Day Awakening Streak
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Scale size={16} color="var(--electric-cyan)" />
+            <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--electric-cyan)', letterSpacing: '0.08em' }}>
+              SCALE OF TRUTH // WEIGHT LOSS
+            </span>
+          </div>
+          <span style={{ fontSize: '0.72rem', color: 'var(--sovereign-gold)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>
+            {streakDays}d Streak
           </span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, textAlign: 'center' }}>
-          <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '10px 4px', borderRadius: 6, border: '1px solid var(--hud-border-dark)' }}>
-            <div style={{ fontSize: '0.66rem', color: 'var(--text-faint)', fontFamily: 'var(--font-hud)' }}>INITIAL</div>
-            <div style={{ fontFamily: 'var(--font-hud)', fontSize: '1.15rem', fontWeight: 700, color: 'var(--text-bright)' }}>
+        {/* Start, Current, Goal Grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, textAlign: 'center', marginBottom: 12 }}>
+          <div style={{ background: 'rgba(255, 255, 255, 0.02)', padding: '10px 4px', borderRadius: 6, border: '1px solid var(--border-dormant)' }}>
+            <div style={{ fontSize: '0.64rem', color: '#64748b', fontFamily: 'var(--font-mono)' }}>INITIAL</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', fontWeight: 700 }}>
               {player.startWeight} {player.unit}
             </div>
           </div>
 
-          <div style={{ background: 'rgba(0, 229, 255, 0.05)', border: '1px solid var(--hud-border-cyan)', padding: '10px 4px', borderRadius: 6 }}>
-            <div style={{ fontSize: '0.66rem', color: 'var(--mana-cyan)', fontFamily: 'var(--font-hud)', fontWeight: 700 }}>CURRENT</div>
-            <div style={{ fontFamily: 'var(--font-hud)', fontSize: '1.25rem', fontWeight: 700, color: '#fff' }}>
+          <div style={{ background: 'rgba(0, 240, 255, 0.05)', border: '1px solid var(--border-active-cyan)', padding: '10px 4px', borderRadius: 6 }}>
+            <div style={{ fontSize: '0.64rem', color: 'var(--electric-cyan)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>CURRENT</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.25rem', fontWeight: 700, color: '#fff' }}>
               {player.currentWeight} {player.unit}
             </div>
           </div>
 
           <div style={{ background: 'rgba(16, 185, 129, 0.05)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '10px 4px', borderRadius: 6 }}>
-            <div style={{ fontSize: '0.66rem', color: 'var(--clear-green)', fontFamily: 'var(--font-hud)', fontWeight: 700 }}>TARGET</div>
-            <div style={{ fontFamily: 'var(--font-hud)', fontSize: '1.15rem', fontWeight: 700, color: 'var(--clear-green)' }}>
+            <div style={{ fontSize: '0.64rem', color: 'var(--calm-green)', fontFamily: 'var(--font-mono)', fontWeight: 600 }}>TARGET</div>
+            <div style={{ fontFamily: 'var(--font-display)', fontSize: '1.15rem', fontWeight: 700, color: 'var(--calm-green)' }}>
               {player.targetWeight} {player.unit}
             </div>
           </div>
         </div>
 
-        <div style={{ marginTop: 12, textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-dim)', borderTop: '1px solid var(--hud-border-dark)', paddingTop: 10 }}>
-          Metamorphosis Progress: <strong style={{ color: 'var(--mana-cyan)' }}>{(player.startWeight - player.currentWeight).toFixed(1)} {player.unit}</strong> stripped from physical vessel.
+        {/* Progress bar */}
+        <div className="laser-meter-track" style={{ height: 6, marginBottom: 8 }}>
+          <div className="laser-meter-fill exp" style={{ width: `${progressPct}%` }} />
         </div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', color: '#94a3b8', fontFamily: 'var(--font-mono)', marginBottom: 12 }}>
+          <span style={{ color: 'var(--calm-green)' }}>-{currentLost.toFixed(1)} {player.unit} shed ({progressPct}%)</span>
+          <span>~{daysToGoal} days to target</span>
+        </div>
+
+        {/* Dynamic Log Weigh-In Form */}
+        <form onSubmit={handleWeightSubmit} style={{ display: 'flex', gap: 6 }}>
+          <input
+            type="number"
+            step="0.1"
+            placeholder={`Log weigh-in (${player.unit})`}
+            value={inputWeight}
+            onChange={(e) => setInputWeight(e.target.value)}
+            style={{
+              flex: 1,
+              background: 'rgba(7, 9, 14, 0.8)',
+              border: '1px solid var(--border-dormant)',
+              borderRadius: 6,
+              padding: '8px 12px',
+              color: '#fff',
+              fontSize: '0.85rem',
+              fontFamily: 'var(--font-mono)',
+            }}
+          />
+          <button type="submit" className="btn-sovereign" style={{ padding: '0 16px' }}>
+            Record
+          </button>
+        </form>
+
+        {/* History Toggle */}
+        <div style={{ marginTop: 10, textAlign: 'center' }}>
+          <button
+            onClick={() => setShowHistory(!showHistory)}
+            style={{ background: 'none', border: 'none', color: '#64748b', fontSize: '0.72rem', cursor: 'pointer', fontFamily: 'var(--font-mono)' }}
+          >
+            {showHistory ? 'Hide Weigh-in Log ▲' : `View Weigh-in Log (${(weightHistory || []).length}) ▼`}
+          </button>
+        </div>
+
+        {/* Weigh-in History List */}
+        {showHistory && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 10, borderTop: '1px solid var(--border-dormant)', paddingTop: 10 }}>
+            {(weightHistory || []).slice().reverse().map((wh) => (
+              <div key={wh.date} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', padding: '4px 6px' }}>
+                <span style={{ color: '#94a3b8', fontFamily: 'var(--font-mono)' }}>{wh.date}</span>
+                <span style={{ fontWeight: 700, color: '#fff' }}>{wh.weight} {player.unit}</span>
+                {weightHistory.length > 1 && (
+                  <button
+                    onClick={() => onDeleteWeightLog(wh.date)}
+                    style={{ background: 'none', border: 'none', color: 'var(--lethal-red)', cursor: 'pointer', padding: 2 }}
+                    title="Delete record"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

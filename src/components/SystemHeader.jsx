@@ -1,47 +1,44 @@
 import React from 'react';
-import { Volume2, VolumeX, Coins, Sparkles, Activity } from 'lucide-react';
+import { Volume2, VolumeX, Coins, Sliders, Shield } from 'lucide-react';
 import { getRankFromLevel } from '../utils/soloStorage';
 
-export const SystemHeader = ({ player, soundEnabled, onToggleSound, onTriggerDing }) => {
+export const SystemHeader = ({ player, soundEnabled, onToggleSound, onTriggerDing, onOpenSettings }) => {
   const currentRank = getRankFromLevel(player.level);
 
   return (
-    <header className="hud-header">
+    <header className="sovereign-header">
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <button
           onClick={onTriggerDing}
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
           title="System Sound Diagnostic"
         >
-          <div className="hud-title-tag">
+          <div className="sovereign-title">
             <span>THE SYSTEM</span>
           </div>
         </button>
 
-        {/* Chamfered Hunter Rank Crest */}
+        {/* Minimalist Hunter Rank Pill */}
         <div
-          className="hunter-rank-crest"
+          className="hunter-rank-pill"
           style={{
             borderColor: currentRank.color,
             color: currentRank.color,
-            background: `linear-gradient(135deg, ${currentRank.color}25 0%, transparent 100%)`,
-            textShadow: `0 0 10px ${currentRank.color}`,
+            background: `${currentRank.color}15`,
           }}
         >
-          <Activity size={12} strokeWidth={2.5} />
-          <span>{currentRank.rank}</span>
+          {currentRank.rank}
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         {/* Hunter Level */}
         <div
           style={{
-            fontFamily: 'var(--font-hud)',
-            fontWeight: 700,
-            fontSize: '0.84rem',
-            color: 'var(--mana-cyan)',
-            letterSpacing: '0.04em',
+            fontFamily: 'var(--font-mono)',
+            fontWeight: 600,
+            fontSize: '0.8rem',
+            color: 'var(--electric-cyan)',
           }}
         >
           LV.{player.level}
@@ -53,34 +50,48 @@ export const SystemHeader = ({ player, soundEnabled, onToggleSound, onTriggerDin
             display: 'flex',
             alignItems: 'center',
             gap: 4,
-            fontSize: '0.8rem',
+            fontSize: '0.78rem',
             fontFamily: 'var(--font-mono)',
-            color: 'var(--gold-amber)',
-            fontWeight: 700,
+            color: 'var(--sovereign-gold)',
+            fontWeight: 600,
           }}
         >
-          <Coins size={14} />
+          <Coins size={13} />
           <span>{player.gold.toLocaleString()}</span>
         </div>
 
-        {/* Tactile Audio Switch */}
+        {/* Sound Toggle */}
         <button
           onClick={onToggleSound}
           style={{
-            background: 'rgba(255, 255, 255, 0.04)',
-            border: '1px solid var(--hud-border-dark)',
-            borderRadius: 4,
-            width: 30,
-            height: 30,
+            background: 'none',
+            border: 'none',
+            color: soundEnabled ? 'var(--electric-cyan)' : '#64748b',
+            cursor: 'pointer',
+            padding: 4,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            color: soundEnabled ? 'var(--mana-cyan)' : 'var(--text-faint)',
-            cursor: 'pointer',
           }}
-          title={soundEnabled ? 'Mute System FX' : 'Enable System FX'}
+          title={soundEnabled ? 'Mute Audio' : 'Unmute Audio'}
         >
-          {soundEnabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
+          {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+        </button>
+
+        {/* Settings & Configuration Modal Button */}
+        <button
+          onClick={onOpenSettings}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: '#94a3b8',
+            cursor: 'pointer',
+            padding: 4,
+            display: 'flex',
+            alignItems: 'center',
+          }}
+          title="System Settings & Data"
+        >
+          <Sliders size={16} />
         </button>
       </div>
     </header>

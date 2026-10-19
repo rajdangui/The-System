@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'solo_leveling_system_v2';
+const STORAGE_KEY = 'solo_leveling_system_v3';
 
 export const getTodayKey = () => {
   const d = new Date();
@@ -89,7 +89,7 @@ export const DEFAULT_SOLO_STATE = {
     gold: 5800,
     hp: 100,
     maxHp: 100,
-    // Daily water goal (Mana Points)
+    // Custom Daily Goals
     waterGoalMl: 3000,
     sugarLimitG: 25,
     startWeight: 84.5,
@@ -98,11 +98,11 @@ export const DEFAULT_SOLO_STATE = {
     unit: 'kg',
   },
   stats: {
-    str: 42, // Strength (Workouts)
-    agi: 36, // Agility (Movement / Steps)
-    vit: 45, // Vitality (Water & Stamina)
-    int: 28, // Intelligence (Sugar defense & Strategy)
-    sen: 31, // Perception (Scale truth & Discipline)
+    str: 42,
+    agi: 36,
+    vit: 45,
+    int: 28,
+    sen: 31,
   },
   today: {
     date: getTodayKey(),
@@ -119,6 +119,10 @@ export const DEFAULT_SOLO_STATE = {
       squats: 80,
       runningKm: 3.2,
     },
+    customQuests: [
+      { id: 'cq_1', title: '15-Minute Sunlight Walk', rewardExp: 100, completed: true },
+      { id: 'cq_2', title: 'Zero Sugary Beverages', rewardExp: 150, completed: false },
+    ],
     cravingsCrushed: 3,
     penaltiesCompleted: false,
   },
@@ -136,6 +140,12 @@ export const DEFAULT_SOLO_STATE = {
   inventory: [
     { id: 'inv_1', name: 'Mana Core Elixir', desc: 'Instantly restores +500 mL Water Mana', count: 2, type: 'potion' },
     { id: 'inv_2', name: 'Detox Talisman', desc: 'Neutralizes 10g of consumed sugar', count: 1, type: 'scroll' },
+  ],
+  weightHistory: [
+    { date: '2026-10-01', weight: 84.5 },
+    { date: '2026-10-07', weight: 83.8 },
+    { date: '2026-10-14', weight: 82.6 },
+    { date: '2026-10-19', weight: 81.5 },
   ],
   streakDays: 6,
   bestStreak: 14,
@@ -176,6 +186,7 @@ export const loadSoloState = () => {
           squats: 0,
           runningKm: 0,
         },
+        customQuests: (parsed.today.customQuests || []).map((q) => ({ ...q, completed: false })),
         cravingsCrushed: 0,
         penaltiesCompleted: false,
       };
