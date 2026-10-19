@@ -1,60 +1,61 @@
 import React from 'react';
-import { Shield, Volume2, VolumeX, Coins, Sparkles } from 'lucide-react';
+import { Volume2, VolumeX, Coins, Sparkles, Activity } from 'lucide-react';
 import { getRankFromLevel } from '../utils/soloStorage';
-import { playSystemSound } from '../utils/audio';
 
 export const SystemHeader = ({ player, soundEnabled, onToggleSound, onTriggerDing }) => {
   const currentRank = getRankFromLevel(player.level);
 
   return (
-    <header className="system-header">
+    <header className="hud-header">
       <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
         <button
           onClick={onTriggerDing}
           style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
-          title="Trigger System Ding"
+          title="System Sound Diagnostic"
         >
-          <div className="system-title-tag">
-            <span>[THE SYSTEM]</span>
+          <div className="hud-title-tag">
+            <span>THE SYSTEM</span>
           </div>
         </button>
 
-        {/* Hunter Rank Badge */}
+        {/* Chamfered Hunter Rank Crest */}
         <div
-          className="hunter-rank-badge"
+          className="hunter-rank-crest"
           style={{
             borderColor: currentRank.color,
             color: currentRank.color,
-            background: `${currentRank.color}15`,
-            boxShadow: `0 0 10px ${currentRank.color}30`,
+            background: `linear-gradient(135deg, ${currentRank.color}25 0%, transparent 100%)`,
+            textShadow: `0 0 10px ${currentRank.color}`,
           }}
         >
-          {currentRank.rank}
+          <Activity size={12} strokeWidth={2.5} />
+          <span>{currentRank.rank}</span>
         </div>
       </div>
 
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-        {/* Level */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Hunter Level */}
         <div
           style={{
-            fontFamily: 'var(--font-mono)',
-            fontWeight: 800,
-            fontSize: '0.82rem',
-            color: 'var(--sys-cyan)',
+            fontFamily: 'var(--font-hud)',
+            fontWeight: 700,
+            fontSize: '0.84rem',
+            color: 'var(--mana-cyan)',
+            letterSpacing: '0.04em',
           }}
         >
           LV.{player.level}
         </div>
 
-        {/* Gold */}
+        {/* Gold Counter */}
         <div
           style={{
             display: 'flex',
             alignItems: 'center',
             gap: 4,
-            fontSize: '0.78rem',
+            fontSize: '0.8rem',
             fontFamily: 'var(--font-mono)',
-            color: 'var(--sys-gold)',
+            color: 'var(--gold-amber)',
             fontWeight: 700,
           }}
         >
@@ -62,24 +63,24 @@ export const SystemHeader = ({ player, soundEnabled, onToggleSound, onTriggerDin
           <span>{player.gold.toLocaleString()}</span>
         </div>
 
-        {/* Sound Toggle */}
+        {/* Tactile Audio Switch */}
         <button
           onClick={onToggleSound}
           style={{
-            background: 'rgba(0, 229, 255, 0.1)',
-            border: '1px solid var(--sys-border)',
-            borderRadius: 6,
-            width: 32,
-            height: 32,
+            background: 'rgba(255, 255, 255, 0.04)',
+            border: '1px solid var(--hud-border-dark)',
+            borderRadius: 4,
+            width: 30,
+            height: 30,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            color: soundEnabled ? 'var(--sys-cyan)' : '#64748b',
+            color: soundEnabled ? 'var(--mana-cyan)' : 'var(--text-faint)',
             cursor: 'pointer',
           }}
-          title={soundEnabled ? 'Mute System Sounds' : 'Unmute System Sounds'}
+          title={soundEnabled ? 'Mute System FX' : 'Enable System FX'}
         >
-          {soundEnabled ? <Volume2 size={16} /> : <VolumeX size={16} />}
+          {soundEnabled ? <Volume2 size={15} /> : <VolumeX size={15} />}
         </button>
       </div>
     </header>
