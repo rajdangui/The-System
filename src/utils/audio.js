@@ -1,4 +1,4 @@
-// System Audio Synthesizer (Solo Leveling Audio Effects via Web Audio API)
+// System Audio Synthesizer (Web Audio API Synthesizer)
 let audioCtx = null;
 
 function getAudioContext() {
@@ -22,7 +22,7 @@ export const playSystemSound = (type = 'ding', soundEnabled = true) => {
     const now = ctx.currentTime;
 
     if (type === 'ding') {
-      // The iconic Solo Leveling System "DING!" Notification
+      // Precision UI Action Chime
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.type = 'sine';
@@ -35,7 +35,7 @@ export const playSystemSound = (type = 'ding', soundEnabled = true) => {
       osc.start(now);
       osc.stop(now + 0.55);
     } else if (type === 'level_up') {
-      // Solo Leveling Majestic Level Up Fanfare
+      // Target Milestone Achieved Fanfare
       const notes = [523.25, 659.25, 783.99, 1046.5, 1318.5]; // C5, E5, G5, C6, E6
       notes.forEach((freq, idx) => {
         const osc = ctx.createOscillator();

@@ -219,8 +219,8 @@ body {
   color: var(--electric-cyan);
 }
 
-/* Hunter Rank Badges - Surgical Outline */
-.hunter-rank-pill {
+/* Status Metric Badges - Surgical Outline */
+.status-pill {
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 0.72rem;
