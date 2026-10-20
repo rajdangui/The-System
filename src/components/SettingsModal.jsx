@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Sliders, Save, RotateCcw, Download, Upload, Shield } from 'lucide-react';
+import { X, Sliders, Save, RotateCcw, Download } from 'lucide-react';
 
 export const SettingsModal = ({ isOpen, onClose, state, onSavePlayerSettings, onResetAll }) => {
   const [formData, setFormData] = useState({

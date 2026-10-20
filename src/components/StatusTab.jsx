@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Heart, Droplets, Zap, Award, Scale, Trash2, Plus, Calendar, TrendingDown } from 'lucide-react';
-import { getRankFromLevel, getTodayKey } from '../utils/soloStorage';
+import { Heart, Droplets, Zap, Award, Scale, Trash2 } from 'lucide-react';
+import { getRankFromLevel } from '../utils/soloStorage';
 
 export const StatusTab = ({ state, onAllocateStat, onLogWeight, onDeleteWeightLog }) => {
   const { player, stats, today, streakDays, weightHistory } = state;
@@ -140,8 +140,10 @@ export const StatusTab = ({ state, onAllocateStat, onLogWeight, onDeleteWeightLo
         </div>
       )}
 
-      {/* Hunter Parameters (Stats) */}
-      <div className="sovereign-card">
+      {/* Responsive Tactical 2-Column Grid for Parameters & Weight Metamorphosis */}
+      <div className="deck-grid-2">
+        {/* Hunter Parameters (Stats) */}
+        <div className="sovereign-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.72rem', color: 'var(--electric-cyan)', letterSpacing: '0.08em' }}>
             HUNTER PARAMETERS
@@ -285,6 +287,7 @@ export const StatusTab = ({ state, onAllocateStat, onLogWeight, onDeleteWeightLo
             ))}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

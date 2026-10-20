@@ -2,34 +2,32 @@ import React, { useState, useEffect } from 'react';
 import { X, Droplets, Zap, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { playSystemSound } from '../utils/audio';
 
-export const CravingModal = ({ isOpen, onClose, onResisted, soundEnabled }) => {
+const CravingModalContent = ({ onClose, onResisted, soundEnabled }) => {
   const [timeLeft, setTimeLeft] = useState(180); // 3 minutes = 180 seconds
-  const [isRunning, setIsRunning] = useState(false);
+  const [isRunning, setIsRunning] = useState(true);
   const [waterChugged, setWaterChugged] = useState(false);
 
   useEffect(() => {
-    if (isOpen) {
-      setTimeLeft(180);
-      setIsRunning(true);
-      setWaterChugged(false);
-      playSystemSound('danger', soundEnabled);
-    }
-  }, [isOpen]);
+    playSystemSound('danger', soundEnabled);
+  }, [soundEnabled]);
 
   useEffect(() => {
-    let interval = null;
-    if (isRunning && timeLeft > 0) {
-      interval = setInterval(() => {
-        setTimeLeft((prev) => prev - 1);
-      }, 1000);
-    } else if (timeLeft === 0 && isRunning) {
-      setIsRunning(false);
+    if (!isRunning) return;
+    if (timeLeft <= 0) {
       playSystemSound('level_up', soundEnabled);
+      return;
     }
+    const interval = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          setIsRunning(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
     return () => clearInterval(interval);
   }, [isRunning, timeLeft, soundEnabled]);
-
-  if (!isOpen) return null;
 
   const minutes = Math.floor(timeLeft / 60);
   const seconds = timeLeft % 60;
@@ -82,6 +80,9 @@ export const CravingModal = ({ isOpen, onClose, onResisted, soundEnabled }) => {
             </div>
             <div style={{ fontSize: '0.68rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
               Dopamine Delay
+            </div>
+            <div style={{ width: '80%', height: 3, background: 'rgba(255, 255, 255, 0.1)', borderRadius: 2, marginTop: 8, overflow: 'hidden' }}>
+              <div style={{ width: `${progressPct}%`, height: '100%', background: 'var(--lethal-red)', transition: 'width 1s linear' }} />
             </div>
           </div>
         </div>
@@ -156,5 +157,16 @@ export const CravingModal = ({ isOpen, onClose, onResisted, soundEnabled }) => {
         </div>
       </div>
     </div>
+  );
+};
+
+export const CravingModal = ({ isOpen, onClose, onResisted, soundEnabled }) => {
+  if (!isOpen) return null;
+  return (
+    <CravingModalContent
+      onClose={onClose}
+      onResisted={onResisted}
+      soundEnabled={soundEnabled}
+    />
   );
 };

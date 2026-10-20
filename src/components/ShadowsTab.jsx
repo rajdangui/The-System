@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, Package, FlaskConical, Scroll, ShoppingBag, Coins, UserCheck, Shield } from 'lucide-react';
+import { Sparkles, Package, FlaskConical, Scroll, ShoppingBag, Coins, UserCheck } from 'lucide-react';
 
 export const ShadowsTab = ({ state, onUseItem, onBuyItem }) => {
   const { shadows, inventory, player } = state;
@@ -107,8 +107,10 @@ export const ShadowsTab = ({ state, onUseItem, onBuyItem }) => {
         )}
       </div>
 
-      {/* Inventory Stash */}
-      <div className="sovereign-card">
+      {/* Responsive Tactical 2-Column Grid for Inventory & Shop */}
+      <div className="deck-grid-2">
+        {/* Inventory Stash */}
+        <div className="sovereign-card">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
             <Package size={15} color="var(--sovereign-gold)" />
@@ -222,6 +224,7 @@ export const ShadowsTab = ({ state, onUseItem, onBuyItem }) => {
             );
           })}
         </div>
+      </div>
       </div>
     </div>
   );

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Droplets, Candy, Dumbbell, CheckCircle2, Clock, Plus, Zap, AlertTriangle, Trash2, CheckSquare, Square } from 'lucide-react';
-import { playSystemSound } from '../utils/audio';
+import { Droplets, Candy, Dumbbell, CheckCircle2, Clock, Plus, AlertTriangle, Trash2, CheckSquare, Square } from 'lucide-react';
 
 export const QuestsTab = ({
   state,
@@ -134,8 +133,10 @@ export const QuestsTab = ({
           </span>
         </div>
 
-        {/* 1. Water Mana Core */}
-        <div style={{ borderTop: '1px solid var(--border-dormant)', paddingTop: 12, marginBottom: 14 }}>
+        {/* Responsive Dual Column for Hydration & Sugar Poison Defense */}
+        <div className="deck-grid-2" style={{ borderTop: '1px solid var(--border-dormant)', paddingTop: 12, marginBottom: 14 }}>
+          {/* 1. Water Mana Core */}
+          <div style={{ paddingBottom: 6 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
               <Droplets size={16} color="var(--electric-cyan)" />
@@ -278,17 +279,18 @@ export const QuestsTab = ({
             </div>
           )}
         </div>
+        </div>
 
         {/* 3. Hunter Conditioning Routine */}
-        <div style={{ borderTop: '1px solid var(--border-dormant)', paddingTop: 12 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+        <div style={{ borderTop: '1px solid var(--border-dormant)', paddingTop: 14 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
             <Dumbbell size={15} color="var(--electric-cyan)" />
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 600, fontSize: '0.86rem', color: '#fff' }}>
               3. Hunter Conditioning Routine
             </span>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div className="deck-grid-2">
             {/* Pushups */}
             <div className="interactive-item" style={{ flexDirection: 'column', alignItems: 'stretch', gap: 6 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

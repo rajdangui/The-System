@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { Swords, Sparkles, Crown, Crosshair, Skull, Plus, ChevronRight, Zap } from 'lucide-react';
-import { playSystemSound } from '../utils/audio';
+import { Swords, Sparkles, Crown, Crosshair, Skull } from 'lucide-react';
 
 const BossCrest = ({ sigilType }) => {
   if (sigilType === 'monarch') {
@@ -16,7 +15,7 @@ const BossCrest = ({ sigilType }) => {
 };
 
 export const DungeonTab = ({ state, onAttackBoss, onExtractShadow, onAddCustomBoss }) => {
-  const { bosses, player } = state;
+  const { bosses } = state;
   const [weighInInput, setWeighInInput] = useState('');
   const [customName, setCustomName] = useState('');
   const [customGrams, setCustomGrams] = useState('');
@@ -122,8 +121,8 @@ export const DungeonTab = ({ state, onAttackBoss, onExtractShadow, onAddCustomBo
           </div>
         ) : (
           <div style={{ marginTop: 12, borderTop: '1px solid var(--border-dormant)', paddingTop: 10 }}>
-            <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: 8, fontFamily: 'var(--font-mono)' }}>
-              ⚔️ Strike damage from burned grams & workout reps:
+            <div style={{ fontSize: '0.7rem', color: '#94a3b8', marginBottom: 8, fontFamily: 'var(--font-mono)', display: 'flex', alignItems: 'center', gap: 5 }}>
+              <Swords size={13} color="var(--electric-cyan)" /> Strike damage from burned calories, grams & workouts:
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 8 }}>

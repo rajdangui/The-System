@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Skull, CheckCircle2, AlertOctagon, Activity, ShieldAlert } from 'lucide-react';
+import { X, Skull, CheckCircle2, AlertOctagon } from 'lucide-react';
 import { playSystemSound } from '../utils/audio';
 
 export const PenaltyModal = ({ isOpen, onClose, onClearPenalty, soundEnabled }) => {

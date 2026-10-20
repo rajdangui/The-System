@@ -31,6 +31,37 @@ export function App() {
     setState((prev) => ({ ...prev, soundEnabled: !prev.soundEnabled }));
   };
 
+  // Global Keyboard Shortcuts (Desktop Command Deck)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
+        if (e.key === 'Escape') {
+          e.target.blur();
+        }
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        setIsPenaltyModalOpen(false);
+        setIsCravingModalOpen(false);
+        setIsSettingsOpen(false);
+      } else if (e.key === '1') {
+        setActiveTab('status');
+      } else if (e.key === '2') {
+        setActiveTab('quests');
+      } else if (e.key === '3') {
+        setActiveTab('dungeons');
+      } else if (e.key === '4') {
+        setActiveTab('shadows');
+      } else if (e.key === 'm' || e.key === 'M') {
+        setState((prev) => ({ ...prev, soundEnabled: !prev.soundEnabled }));
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+
   const handleTriggerDing = () => {
     playSystemSound('ding', soundEnabled);
     triggerSystemVibration([30, 20, 30]);
