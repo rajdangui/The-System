@@ -1,17 +1,17 @@
 import React from 'react';
-import { User, Scroll, Swords, Sparkles } from 'lucide-react';
+import { LayoutDashboard, CheckSquare, Droplets, Scale } from 'lucide-react';
 import { playSystemSound } from '../utils/audio';
 
 export const Navigation = ({ activeTab, onSelectTab, soundEnabled }) => {
   const tabs = [
-    { id: 'status', label: 'STATUS', icon: User, keyBadge: '1' },
-    { id: 'quests', label: 'QUESTS', icon: Scroll, keyBadge: '2' },
-    { id: 'dungeons', label: 'RAIDS', icon: Swords, keyBadge: '3' },
-    { id: 'shadows', label: 'SHADOWS', icon: Sparkles, keyBadge: '4' },
+    { id: 'dashboard', label: 'DASHBOARD', icon: LayoutDashboard, keyBadge: '1' },
+    { id: 'habits', label: 'HABITS', icon: CheckSquare, keyBadge: '2' },
+    { id: 'nutrition', label: 'NUTRITION', icon: Droplets, keyBadge: '3' },
+    { id: 'body', label: 'BODY', icon: Scale, keyBadge: '4' },
   ];
 
   return (
-    <nav className="sovereign-bottom-nav" role="tablist" aria-label="Command Deck Navigation">
+    <nav className="sovereign-bottom-nav" role="tablist" aria-label="System Navigation">
       {tabs.map((tab) => {
         const Icon = tab.icon;
         const isActive = activeTab === tab.id;
@@ -31,7 +31,7 @@ export const Navigation = ({ activeTab, onSelectTab, soundEnabled }) => {
             }}
           >
             {isActive && <div className="sovereign-nav-indicator" />}
-            <Icon size={18} strokeWidth={isActive ? 2.4 : 1.8} />
+            <Icon size={17} strokeWidth={isActive ? 2.5 : 1.8} />
             <span>{tab.label}</span>
             <span className="desktop-key-hint">{tab.keyBadge}</span>
           </button>

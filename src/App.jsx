@@ -1,27 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import confetti from 'canvas-confetti';
 import { SystemHeader } from './components/SystemHeader';
-import { StatusTab } from './components/StatusTab';
-import { QuestsTab } from './components/QuestsTab';
-import { DungeonTab } from './components/DungeonTab';
-import { ShadowsTab } from './components/ShadowsTab';
+import { DashboardTab } from './components/DashboardTab';
+import { HabitsTab } from './components/HabitsTab';
+import { NutritionTab } from './components/NutritionTab';
+import { BodyTab } from './components/BodyTab';
 import { Navigation } from './components/Navigation';
-import { PenaltyModal } from './components/PenaltyModal';
 import { CravingModal } from './components/CravingModal';
 import { SettingsModal } from './components/SettingsModal';
-import { loadSoloState, saveSoloState, DEFAULT_SOLO_STATE, getTodayKey } from './utils/soloStorage';
+import {
+  loadSystemState,
+  saveSystemState,
+  DEFAULT_SYSTEM_STATE,
+  getTodayKey,
+} from './utils/systemStorage';
 import { playSystemSound, triggerSystemVibration } from './utils/audio';
 
 export function App() {
-  const [state, setState] = useState(() => loadSoloState());
-  const [activeTab, setActiveTab] = useState('status');
-  const [isPenaltyModalOpen, setIsPenaltyModalOpen] = useState(false);
+  const [state, setState] = useState(() => loadSystemState());
+  const [activeTab, setActiveTab] = useState('dashboard');
   const [isCravingModalOpen, setIsCravingModalOpen] = useState(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-  // Sync to local storage
+  // Sync state to local storage
   useEffect(() => {
-    saveSoloState(state);
+    saveSystemState(state);
   }, [state]);
 
   const soundEnabled = state.soundEnabled;
@@ -31,7 +34,7 @@ export function App() {
     setState((prev) => ({ ...prev, soundEnabled: !prev.soundEnabled }));
   };
 
-  // Global Keyboard Shortcuts (Desktop Command Deck)
+  // Keyboard Shortcuts (1, 2, 3, 4, M, Esc)
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (['INPUT', 'TEXTAREA', 'SELECT'].includes(e.target.tagName)) {
@@ -42,17 +45,16 @@ export function App() {
       }
 
       if (e.key === 'Escape') {
-        setIsPenaltyModalOpen(false);
         setIsCravingModalOpen(false);
         setIsSettingsOpen(false);
       } else if (e.key === '1') {
-        setActiveTab('status');
+        setActiveTab('dashboard');
       } else if (e.key === '2') {
-        setActiveTab('quests');
+        setActiveTab('habits');
       } else if (e.key === '3') {
-        setActiveTab('dungeons');
+        setActiveTab('nutrition');
       } else if (e.key === '4') {
-        setActiveTab('shadows');
+        setActiveTab('body');
       } else if (e.key === 'm' || e.key === 'M') {
         setState((prev) => ({ ...prev, soundEnabled: !prev.soundEnabled }));
       }
@@ -67,224 +69,186 @@ export function App() {
     triggerSystemVibration([30, 20, 30]);
   };
 
-  // Add EXP and handle Level Up
-  const addExp = (amount) => {
+  // 1. Water Tracking
+  const handleAddWater = (amount) => {
+    playSystemSound('click', soundEnabled);
+    triggerSystemVibration([25]);
+
     setState((prev) => {
-      let newExp = prev.player.exp + amount;
-      let newLevel = prev.player.level;
-      let newExpNext = prev.player.expNext;
-      let unallocated = prev.player.unallocatedStats;
-      let leveledUp = false;
+      const newWater = (prev.today.waterMl || 0) + amount;
+      const reachedGoal = newWater >= prev.user.waterGoalMl && prev.today.waterMl < prev.user.waterGoalMl;
 
-      while (newExp >= newExpNext) {
-        newExp -= newExpNext;
-        newLevel += 1;
-        newExpNext = Math.round(newExpNext * 1.25);
-        unallocated += 3;
-        leveledUp = true;
-      }
-
-      if (leveledUp) {
+      if (reachedGoal) {
         playSystemSound('level_up', soundEnabled);
-        triggerSystemVibration([60, 40, 80]);
         try {
           confetti({
-            particleCount: 100,
-            spread: 70,
+            particleCount: 80,
+            spread: 60,
             origin: { y: 0.6 },
-            colors: ['#00f0ff', '#38bdf8', '#a855f7', '#fbbf24'],
+            colors: ['#00f0ff', '#38bdf8', '#10b981'],
           });
         } catch {}
       }
 
       return {
         ...prev,
-        player: {
-          ...prev.player,
-          level: newLevel,
-          exp: newExp,
-          expNext: newExpNext,
-          unallocatedStats: unallocated,
+        today: {
+          ...prev.today,
+          waterMl: newWater,
         },
       };
     });
   };
 
-  // Water Actions (Mana Recovery)
-  const handleAddWater = (amt) => {
-    playSystemSound('water', soundEnabled);
-    triggerSystemVibration();
-    addExp(40);
-
-    setState((prev) => ({
-      ...prev,
-      today: {
-        ...prev.today,
-        waterMl: prev.today.waterMl + amt,
-      },
-    }));
-  };
-
-  // Sugar Actions (Poison defense)
-  const handleAddSugar = (grams, name) => {
-    const prevSugar = state.today.sugarG;
-    const newSugar = prevSugar + grams;
-
-    if (newSugar > state.player.sugarLimitG) {
-      playSystemSound('danger', soundEnabled);
-      triggerSystemVibration([80, 50, 80]);
-    } else {
-      playSystemSound('ding', soundEnabled);
-    }
-
-    const newSugarItem = {
+  // 2. Sugar & Nutrition Tracking
+  const handleAddSugar = (grams, name = 'Food Item') => {
+    const now = new Date();
+    const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+    const newItem = {
       id: Date.now().toString(),
       name,
       grams,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      time: timeStr,
     };
 
-    setState((prev) => ({
-      ...prev,
-      today: {
-        ...prev.today,
-        sugarG: newSugar,
-        sugarItems: [...(prev.today.sugarItems || []), newSugarItem],
-      },
-    }));
+    setState((prev) => {
+      const newTotal = (prev.today.sugarG || 0) + grams;
+      if (newTotal > prev.user.sugarLimitG && prev.today.sugarG <= prev.user.sugarLimitG) {
+        playSystemSound('danger', soundEnabled);
+        triggerSystemVibration([100, 50, 100]);
+      } else {
+        playSystemSound('click', soundEnabled);
+      }
+
+      return {
+        ...prev,
+        today: {
+          ...prev.today,
+          sugarG: newTotal,
+          sugarItems: [...(prev.today.sugarItems || []), newItem],
+        },
+      };
+    });
   };
 
   const handleDeleteSugar = (id) => {
     playSystemSound('click', soundEnabled);
     setState((prev) => {
-      const item = (prev.today.sugarItems || []).find((s) => s.id === id);
-      const deductGrams = item ? item.grams : 0;
+      const itemToDelete = (prev.today.sugarItems || []).find((i) => i.id === id);
+      const deduct = itemToDelete ? itemToDelete.grams : 0;
       return {
         ...prev,
         today: {
           ...prev.today,
-          sugarG: Math.max(0, prev.today.sugarG - deductGrams),
-          sugarItems: prev.today.sugarItems.filter((s) => s.id !== id),
+          sugarG: Math.max(0, (prev.today.sugarG || 0) - deduct),
+          sugarItems: (prev.today.sugarItems || []).filter((i) => i.id !== id),
         },
       };
     });
   };
 
-  // Exercise Conditioning
-  const handleAddExercise = (type, amt) => {
-    playSystemSound('ding', soundEnabled);
-    triggerSystemVibration();
-    addExp(25);
+  // 3. Conditioning Exercises
+  const handleAddExercise = (exerciseKey, amount) => {
+    playSystemSound('click', soundEnabled);
+    triggerSystemVibration([30]);
 
-    setState((prev) => ({
-      ...prev,
-      today: {
-        ...prev.today,
-        exercises: {
-          ...prev.today.exercises,
-          [type]: prev.today.exercises[type] + amt,
+    setState((prev) => {
+      const current = prev.today.conditioning[exerciseKey] || 0;
+      return {
+        ...prev,
+        today: {
+          ...prev.today,
+          conditioning: {
+            ...prev.today.conditioning,
+            [exerciseKey]: parseFloat((current + amount).toFixed(1)),
+          },
         },
-      },
-      stats: {
-        ...prev.stats,
-        str: prev.stats.str + (type === 'pushups' ? 1 : 0),
-        agi: prev.stats.agi + (type === 'runningKm' ? 1 : 0),
-      },
-    }));
+      };
+    });
   };
 
-  // Custom Daily Quests
-  const handleToggleCustomQuest = (id) => {
-    playSystemSound('ding', soundEnabled);
+  // 4. Habits Checklist
+  const handleToggleHabit = (id) => {
     setState((prev) => {
-      let expBonus = 0;
-      const updated = (prev.today.customQuests || []).map((q) => {
-        if (q.id === id) {
-          const nextCompleted = !q.completed;
-          if (nextCompleted) expBonus = q.rewardExp || 100;
-          return { ...q, completed: nextCompleted };
+      const habit = (prev.today.habits || []).find((h) => h.id === id);
+      const isNowCompleted = habit ? !habit.completed : false;
+
+      if (isNowCompleted) {
+        playSystemSound('ding', soundEnabled);
+        triggerSystemVibration([40]);
+      } else {
+        playSystemSound('click', soundEnabled);
+      }
+
+      const updatedHabits = (prev.today.habits || []).map((h) => {
+        if (h.id === id) {
+          const nextStreak = isNowCompleted ? (h.streak || 0) + 1 : Math.max(0, (h.streak || 1) - 1);
+          return { ...h, completed: isNowCompleted, streak: nextStreak };
         }
-        return q;
+        return h;
       });
 
-      if (expBonus > 0) addExp(expBonus);
-
       return {
         ...prev,
         today: {
           ...prev.today,
-          customQuests: updated,
+          habits: updatedHabits,
         },
       };
     });
   };
 
-  const handleAddCustomQuest = (title) => {
+  const handleAddHabit = (title) => {
     playSystemSound('ding', soundEnabled);
-    const newQuest = {
-      id: `cq_${Date.now()}`,
+    const newH = {
+      id: `h_${Date.now()}`,
       title,
-      rewardExp: 100,
       completed: false,
+      streak: 0,
     };
     setState((prev) => ({
       ...prev,
       today: {
         ...prev.today,
-        customQuests: [...(prev.today.customQuests || []), newQuest],
+        habits: [...(prev.today.habits || []), newH],
       },
     }));
   };
 
-  const handleDeleteCustomQuest = (id) => {
+  const handleDeleteHabit = (id) => {
     playSystemSound('click', soundEnabled);
     setState((prev) => ({
       ...prev,
       today: {
         ...prev.today,
-        customQuests: (prev.today.customQuests || []).filter((q) => q.id !== id),
+        habits: (prev.today.habits || []).filter((h) => h.id !== id),
       },
     }));
   };
 
-  // Stat Allocation
-  const handleAllocateStat = (key) => {
-    if (state.player.unallocatedStats <= 0) return;
+  // 5. Weight & Transformation
+  const handleLogWeight = (newWeight) => {
     playSystemSound('ding', soundEnabled);
+    triggerSystemVibration([50]);
+    const todayKey = getTodayKey();
 
-    setState((prev) => ({
-      ...prev,
-      player: {
-        ...prev.player,
-        unallocatedStats: prev.player.unallocatedStats - 1,
-      },
-      stats: {
-        ...prev.stats,
-        [key]: prev.stats[key] + 1,
-      },
-    }));
-  };
-
-  // Weight Logging & History
-  const handleLogWeight = (weight) => {
-    playSystemSound('level_up', soundEnabled);
-    triggerSystemVibration([40, 20, 60]);
-    addExp(150);
-
-    const today = getTodayKey();
     setState((prev) => {
-      const existing = (prev.weightHistory || []).filter((wh) => wh.date !== today);
+      const existingHistory = prev.weightHistory || [];
+      const updatedHistory = existingHistory.some((w) => w.date === todayKey)
+        ? existingHistory.map((w) => (w.date === todayKey ? { ...w, weight: newWeight } : w))
+        : [...existingHistory, { date: todayKey, weight: newWeight }];
+
       return {
         ...prev,
-        player: {
-          ...prev.player,
-          currentWeight: weight,
+        user: {
+          ...prev.user,
+          currentWeight: newWeight,
         },
         today: {
           ...prev.today,
           weightLogged: true,
         },
-        weightHistory: [...existing, { date: today, weight }],
+        weightHistory: updatedHistory,
       };
     });
   };
@@ -292,176 +256,27 @@ export function App() {
   const handleDeleteWeightLog = (date) => {
     playSystemSound('click', soundEnabled);
     setState((prev) => {
-      const filtered = (prev.weightHistory || []).filter((wh) => wh.date !== date);
+      const filtered = (prev.weightHistory || []).filter((w) => w.date !== date);
       const latest = filtered[filtered.length - 1];
       return {
         ...prev,
-        player: {
-          ...prev.player,
-          currentWeight: latest ? latest.weight : prev.player.currentWeight,
+        user: {
+          ...prev.user,
+          currentWeight: latest ? latest.weight : prev.user.startWeight,
         },
         weightHistory: filtered,
       };
     });
   };
 
-  // Dungeon Boss Attacks
-  const handleAttackBoss = (bossId, grams) => {
-    playSystemSound('attack', soundEnabled);
-    triggerSystemVibration([50, 30, 70]);
-    addExp(grams * 2);
-
-    setState((prev) => {
-      const updatedBosses = prev.bosses.map((b) => {
-        if (b.id !== bossId) return b;
-        const newDmg = Math.min(b.maxGrams, b.damageTaken + grams);
-        return { ...b, damageTaken: newDmg };
-      });
-
-      const newWeight = Math.max(prev.player.targetWeight, prev.player.currentWeight - grams / 1000);
-
-      return {
-        ...prev,
-        player: {
-          ...prev.player,
-          currentWeight: parseFloat(newWeight.toFixed(2)),
-        },
-        bosses: updatedBosses,
-      };
-    });
-  };
-
-  const handleExtractShadow = (bossId) => {
-    playSystemSound('level_up', soundEnabled);
-    triggerSystemVibration([100, 50, 150]);
-
-    try {
-      confetti({
-        particleCount: 120,
-        spread: 80,
-        origin: { y: 0.5 },
-        colors: ['#a855f7', '#00f0ff', '#38bdf8', '#ffffff'],
-      });
-    } catch {}
-
-    setState((prev) => {
-      const targetBoss = prev.bosses.find((b) => b.id === bossId);
-      if (!targetBoss) return prev;
-
-      const newShadow = {
-        id: `sh_${Date.now()}`,
-        name: `Shadow ${targetBoss.shadow}`,
-        rank: `${targetBoss.rank} Elite`,
-        ability: `+10% EXP & Guards Streak`,
-        extractedAt: getTodayKey(),
-        type: 'elite',
-      };
-
-      const updatedBosses = prev.bosses.map((b) =>
-        b.id === bossId ? { ...b, defeated: true } : b
-      );
-
-      return {
-        ...prev,
-        bosses: updatedBosses,
-        shadows: [...prev.shadows, newShadow],
-        player: {
-          ...prev.player,
-          exp: prev.player.exp + targetBoss.rewardExp,
-          gold: prev.player.gold + targetBoss.rewardGold,
-        },
-      };
-    });
-  };
-
-  const handleAddCustomBoss = (name, maxGrams) => {
-    playSystemSound('ding', soundEnabled);
-    const newBoss = {
-      id: `boss_${Date.now()}`,
-      name,
-      rank: 'A-RANK',
-      title: 'Custom Calamity Gate',
-      maxGrams,
-      damageTaken: 0,
-      sigilType: 'knight',
-      shadow: name.split(' ')[0],
-      defeated: false,
-      rewardExp: Math.round(maxGrams * 1.5),
-      rewardGold: maxGrams * 5,
-    };
-
-    setState((prev) => ({
-      ...prev,
-      bosses: [...prev.bosses, newBoss],
-    }));
-  };
-
-  // Inventory & Shop
-  const handleUseItem = (itemId) => {
-    playSystemSound('ding', soundEnabled);
-    setState((prev) => {
-      const item = prev.inventory.find((i) => i.id === itemId);
-      if (!item || item.count <= 0) return prev;
-
-      let waterBonus = 0;
-      let sugarDeduct = 0;
-
-      if (itemId === 'inv_1') waterBonus = 500;
-      if (itemId === 'inv_2') sugarDeduct = 10;
-
-      return {
-        ...prev,
-        today: {
-          ...prev.today,
-          waterMl: prev.today.waterMl + waterBonus,
-          sugarG: Math.max(0, prev.today.sugarG - sugarDeduct),
-        },
-        inventory: prev.inventory
-          .map((i) => (i.id === itemId ? { ...i, count: i.count - 1 } : i))
-          .filter((i) => i.count > 0),
-      };
-    });
-  };
-
-  const handleBuyItem = (itemId, price) => {
-    if (state.player.gold < price) return;
-    playSystemSound('ding', soundEnabled);
-
-    setState((prev) => {
-      const existing = prev.inventory.find((i) => i.id === itemId);
-      let newInv;
-      if (existing) {
-        newInv = prev.inventory.map((i) =>
-          i.id === itemId ? { ...i, count: i.count + 1 } : i
-        );
-      } else {
-        const itemInfo =
-          itemId === 'inv_1'
-            ? { id: 'inv_1', name: 'Mana Core Elixir', desc: '+500 mL Water Mana recovery', type: 'potion', count: 1 }
-            : { id: 'inv_2', name: 'Detox Talisman', desc: 'Neutralizes 10g of consumed sugar', type: 'scroll', count: 1 };
-        newInv = [...prev.inventory, itemInfo];
-      }
-
-      return {
-        ...prev,
-        player: {
-          ...prev.player,
-          gold: prev.player.gold - price,
-        },
-        inventory: newInv,
-      };
-    });
-  };
-
-  // Player Settings & Reset
-  const handleSavePlayerSettings = (formData) => {
+  // 6. User Settings & Reset
+  const handleSaveUserSettings = (formData) => {
     playSystemSound('ding', soundEnabled);
     setState((prev) => ({
       ...prev,
-      player: {
-        ...prev.player,
+      user: {
+        ...prev.user,
         name: formData.name,
-        job: formData.job,
         waterGoalMl: formData.waterGoalMl,
         sugarLimitG: formData.sugarLimitG,
         startWeight: formData.startWeight,
@@ -471,23 +286,15 @@ export function App() {
   };
 
   const handleResetAll = () => {
-    setState(DEFAULT_SOLO_STATE);
-  };
-
-  const handleClearPenalty = () => {
-    setState((prev) => ({
-      ...prev,
-      today: { ...prev.today, penaltiesCompleted: true },
-      player: { ...prev.player, hp: prev.player.maxHp },
-    }));
+    setState(DEFAULT_SYSTEM_STATE);
   };
 
   return (
     <div className="app-viewport">
       <div className="mobile-frame">
-        {/* Minimalist Sovereign Header */}
+        {/* Executive Header */}
         <SystemHeader
-          player={state.player}
+          state={state}
           soundEnabled={soundEnabled}
           onToggleSound={handleToggleSound}
           onTriggerDing={handleTriggerDing}
@@ -496,49 +303,46 @@ export function App() {
 
         {/* Scrollable Main Viewport */}
         <main className="app-content">
-          {activeTab === 'status' && (
-            <StatusTab
+          {activeTab === 'dashboard' && (
+            <DashboardTab
               state={state}
-              onAllocateStat={handleAllocateStat}
-              onLogWeight={handleLogWeight}
-              onDeleteWeightLog={handleDeleteWeightLog}
-            />
-          )}
-
-          {activeTab === 'quests' && (
-            <QuestsTab
-              state={state}
+              onNavigateTab={setActiveTab}
               onAddWater={handleAddWater}
-              onAddSugar={handleAddSugar}
-              onDeleteSugar={handleDeleteSugar}
-              onAddExercise={handleAddExercise}
-              onToggleCustomQuest={handleToggleCustomQuest}
-              onAddCustomQuest={handleAddCustomQuest}
-              onDeleteCustomQuest={handleDeleteCustomQuest}
-              onOpenPenaltyModal={() => setIsPenaltyModalOpen(true)}
+              onToggleHabit={handleToggleHabit}
               onOpenCravingModal={() => setIsCravingModalOpen(true)}
             />
           )}
 
-          {activeTab === 'dungeons' && (
-            <DungeonTab
+          {activeTab === 'habits' && (
+            <HabitsTab
               state={state}
-              onAttackBoss={handleAttackBoss}
-              onExtractShadow={handleExtractShadow}
-              onAddCustomBoss={handleAddCustomBoss}
+              onToggleHabit={handleToggleHabit}
+              onAddHabit={handleAddHabit}
+              onDeleteHabit={handleDeleteHabit}
+              onAddExercise={handleAddExercise}
             />
           )}
 
-          {activeTab === 'shadows' && (
-            <ShadowsTab
+          {activeTab === 'nutrition' && (
+            <NutritionTab
               state={state}
-              onUseItem={handleUseItem}
-              onBuyItem={handleBuyItem}
+              onAddWater={handleAddWater}
+              onAddSugar={handleAddSugar}
+              onDeleteSugar={handleDeleteSugar}
+              onOpenCravingModal={() => setIsCravingModalOpen(true)}
+            />
+          )}
+
+          {activeTab === 'body' && (
+            <BodyTab
+              state={state}
+              onLogWeight={handleLogWeight}
+              onDeleteWeightLog={handleDeleteWeightLog}
             />
           )}
         </main>
 
-        {/* Floating Sovereign Bottom Navigation */}
+        {/* Floating Bottom Navigation / Desktop Segmented Dock */}
         <Navigation
           activeTab={activeTab}
           onSelectTab={setActiveTab}
@@ -546,21 +350,17 @@ export function App() {
         />
 
         {/* Modals */}
-        <PenaltyModal
-          isOpen={isPenaltyModalOpen}
-          onClose={() => setIsPenaltyModalOpen(false)}
-          onClearPenalty={handleClearPenalty}
-          soundEnabled={soundEnabled}
-        />
-
         <CravingModal
           isOpen={isCravingModalOpen}
           onClose={() => setIsCravingModalOpen(false)}
           onResisted={() => {
-            addExp(100);
+            playSystemSound('level_up', soundEnabled);
             setState((prev) => ({
               ...prev,
-              today: { ...prev.today, cravingsCrushed: (prev.today.cravingsCrushed || 0) + 1 },
+              today: {
+                ...prev.today,
+                cravingsResisted: (prev.today.cravingsResisted || 0) + 1,
+              },
             }));
           }}
           soundEnabled={soundEnabled}
@@ -570,7 +370,7 @@ export function App() {
           isOpen={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
           state={state}
-          onSavePlayerSettings={handleSavePlayerSettings}
+          onSaveUserSettings={handleSaveUserSettings}
           onResetAll={handleResetAll}
         />
       </div>
